@@ -11,9 +11,12 @@ export default function NotesPage() {
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [userImage, setUserImage] = useState('/profile.jpg');
+  const [userName, setUserName] = useState('');
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId'); // URL에서 userId 추출
+
+  // get user name by userId from database
 
   useEffect(() => {
     async function fetchNotes() {
@@ -40,6 +43,22 @@ export default function NotesPage() {
 
     fetchNotes();
   }, [userId]);
+
+  useEffect(() => {
+    async function fetchUserData() {
+      try {
+        const response = await fetch(`/api/user/${userId}`);
+        if (!response.ok) throw new Error('Failed to fetch user data');
+        const data = await response.json();
+        setUserImage(data.image || '/profile.jpg');
+        setUserName(data.username);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    }
+
+    fetchUserData();
+  }, []);
 
   const addNewNote = async () => {
     try {
@@ -139,6 +158,9 @@ export default function NotesPage() {
         selectNote={setSelectedNoteId}
         addNewNote={addNewNote} // `addNewNote`를 Sidebar로 전달
         deleteNote={deleteNote}
+        userId = {userId}
+        userName={userName}
+        userImage={userImage}
       />
       {error && <div className="error-message text-red-600">{error}</div>}
       {selectedNote && (

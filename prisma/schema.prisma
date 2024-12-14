@@ -17,6 +17,7 @@ model User {
   id       Int      @id @default(autoincrement())
   username String   @unique           // 사용자 이름
   password String                     // 사용자 비밀번호
+  image    String?
   notes    Note[]                     // 사용자와 연결된 노트
 }
 

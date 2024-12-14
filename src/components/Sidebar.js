@@ -1,11 +1,11 @@
 // src/components/Sidebar.js
 
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId }) {
+function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId, userImage, userName }) {
   const router = useRouter();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -13,13 +13,22 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId 
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
 
+  const profileImage = userImage
+  ? `/files/${userImage}` // DB에 저장된 이미지 이름으로 경로 생성
+  : '/files/default.png'; // 기본 이미지
+
   const handleLogout = () => {
-    // 세션 정보 제거 
+    // remove user ID from local storage
     localStorage.removeItem('userId');
 
-    // 로그인 페이지로 리디렉션
+    // redirect to login page
     router.push('/auth');
   };
+
+  const handleProfileClick = () => {
+    router.push(`/profile/${userId}`);
+  };
+
 
   const handleSearchClick = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -58,7 +67,6 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId 
   };
 
   const handleResultClick = (noteId) => {
-    // 검색 결과 클릭 시 노트 페이지로 이동하며 highlight 파라미터 전달
     router.push(`/notes/${noteId}?highlight=${encodeURIComponent(searchQuery)}`);
     setIsSearchOpen(false);
     setSearchQuery('');
@@ -71,11 +79,11 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId 
       {/* 기본 정보 섹션 */}
       <div className="mb-8">
         {/* 프로필 아이콘 */}
-        <div className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer mb-4">
+        <div className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer mb-4" onClick={handleProfileClick}>
           <div className="icon-container flex items-center">
-            <img src="profile.jpg" alt="profile" className="w-6 h-6 rounded-full" />
-          </div>
-          <span className="ml-2">WebP의 ...</span>
+              <img src={profileImage} alt="profile" className="w-12 h-12 rounded-full" />
+            </div>
+          <span className="ml-2">{userName}의 페이지</span>
           <svg
             role="graphics-symbol"
             viewBox="0 0 20 20"

@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import Content from '../../components/Content';
+import CommentsSidebar from '../../components/CommentsSidebar';
 import { useSearchParams } from 'next/navigation';
 import Highlight from 'react-highlight-words';
 import Link from 'next/link';
@@ -155,6 +156,7 @@ export default function NotePage({ params }) {
           updateNote={updateNote} // `updateNote`를 전달
         />
       )}
+       {selectedNote && <CommentsSidebar noteId={selectedNote.id} />}
     </div>
   );
 }

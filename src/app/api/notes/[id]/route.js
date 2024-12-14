@@ -49,14 +49,14 @@ export async function POST(req) {
       console.error('User ID is required');
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
-
+    console.log('Received data:', { title, content, userId });
+    
     const newNote = await prisma.note.create({
       data: {
-        title: title || 'Untitled Note',
+        title: 'New Note',
         content: {
           create: {
-            type: content?.type || 'text',
-            value: content?.value || '',
+            value: 'Initial content',
           },
         },
         userId: parseInt(userId, 10),
@@ -65,7 +65,7 @@ export async function POST(req) {
         content: true,
       },
     });
-
+    console.log("New note created:", newNote);
     return NextResponse.json(newNote);
   } catch (error) {
     console.error('Failed to create note:', error);

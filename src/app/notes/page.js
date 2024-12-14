@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import Content from '../../components/Content';
+import CommentsSidebar from '../../components/CommentsSidebar';
 import { useSearchParams } from 'next/navigation';
 
 export default function NotesPage() {
@@ -146,6 +147,8 @@ export default function NotesPage() {
           updateNote={updateNote} // `updateNote`를 전달
         />
       )}
+       {selectedNote && <CommentsSidebar noteId={selectedNote.id} />}
+
     </div>
   );
 }

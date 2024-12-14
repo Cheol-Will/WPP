@@ -27,11 +27,20 @@ model Note {
   content   Content?
   userId    Int
   user      User      @relation(fields: [userId], references: [id])
+  comments  Comment[]
 }
 
 model Content {
   id     Int    @id @default(autoincrement())
   value  String
   noteId Int    @unique
-  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade) // 수정된 부분
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade)
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  createdAt DateTime  @default(now())
+  noteId    Int       
+  note      Note      @relation(fields: [noteId], references: [id], onDelete: Cascade)
 }

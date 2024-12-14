@@ -112,6 +112,12 @@ export default function NotePage({ params }) {
       console.log(`Attempting to delete note with ID: ${noteId}`);
       const response = await fetch(`/api/notes/${noteId}`, {
         method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId, // 현재 사용자 ID 전달
+        }),
       });
   
       if (!response.ok) {
@@ -144,28 +150,10 @@ export default function NotePage({ params }) {
       />
       {error && <div className="error-message text-red-600 p-4">{error}</div>}
       {selectedNote && (
-        <div className="flex-1 p-4">
-          <Link href="/notes" className="text-blue-500 underline mb-4 block">
-            Back to Notes
-          </Link>
-          <h1 className="text-3xl font-bold mb-2">
-            <Highlight
-              searchWords={[highlight]}
-              textToHighlight={selectedNote.title}
-              highlightClassName="bg-yellow-200"
-            />
-          </h1>
-          <p className="text-gray-600 mb-4">Created At: {new Date(selectedNote.createdAt).toLocaleDateString()}</p>
-          <div className="prose">
-            <Highlight
-              searchWords={[highlight]}
-              textToHighlight={selectedNote.content?.value || ''}
-              highlightClassName="bg-yellow-200"
-            />
-          </div>
-          {/* Content 컴포넌트에 하이라이트 기능이 필요하다면 추가 가능 */}
-          {/* <Content note={selectedNote} updateNote={updateNote} highlight={highlight} /> */}
-        </div>
+        <Content
+          note={selectedNote}
+          updateNote={updateNote} // `updateNote`를 전달
+        />
       )}
     </div>
   );

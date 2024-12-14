@@ -1,3 +1,4 @@
+//src/app/api/notes/[id]/route.js
 import prisma from '../../../../lib/prisma';
 import { NextResponse } from 'next/server';
 export async function PUT(req, context) {
@@ -96,11 +97,14 @@ export async function GET(req, context) {
     return NextResponse.json({ error: 'Failed to fetch note', details: error.message }, { status: 500 });
   }
 }
-export async function DELETE(request, { params }) {
-  const { id } = params;
-  const url = new URL(request.url);
-  const userId = url.searchParams.get('userId');
+export async function DELETE(req, context) {
+  const { params } = context;
+  const { id } = await params; // params를 await
 
+  const data = await req.json();
+  const { userId } = data;
+
+  console.log('Deleting note:', id, 'for user:', userId);
   try {
     // ID 검증
     const noteId = parseInt(id, 10);
@@ -125,12 +129,13 @@ export async function DELETE(request, { params }) {
     if (existingNote.userId.toString() !== userId) {
       return new Response(JSON.stringify({ error: 'Forbidden: You do not own this note' }), { status: 403 });
     }
+    console.log("Existing note:", existingNote);
 
     // 노트 삭제 (연관된 Content도 Cascade 설정에 따라 삭제됨)
     await prisma.note.delete({
       where: { id: noteId },
     });
-
+    console.log(`Note with ID: ${noteId} deleted successfully`);
     return new Response(JSON.stringify({ message: 'Note deleted successfully' }), { status: 200 });
   } catch (error) {
     console.error('Error deleting note:', error);

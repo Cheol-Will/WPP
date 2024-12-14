@@ -24,15 +24,14 @@ model Note {
   id        Int       @id @default(autoincrement())
   title     String
   createdAt DateTime  @default(now())
-  content   Content?        // Note에서 Content로 연결
-  userId    Int                         // 사용자 ID
-  user      User      @relation(fields: [userId], references: [id]) // 사용자와 연결
+  content   Content?
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model Content {
   id     Int    @id @default(autoincrement())
-  type   String
   value  String
   noteId Int    @unique
-  note   Note   @relation(fields: [noteId], references: [id]) // Content에서 Note로 연결
+  note   Note   @relation(fields: [noteId], references: [id], onDelete: Cascade) // 수정된 부분
 }

@@ -100,6 +100,35 @@ export default function NotesPage() {
   };
 
   const selectedNote = notes.find((note) => note.id === selectedNoteId);
+  const deleteNote = async (noteId) => {
+    try {
+      console.log(`Attempting to delete note with ID: ${noteId}`);
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId, // 현재 사용자 ID 전달
+        }),
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Delete note failed:', errorData);
+        throw new Error(errorData.error || 'Failed to delete note');
+      }
+  
+      console.log(`Note with ID: ${noteId} deleted successfully`);
+      setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
+      if (selectedNoteId === noteId) {
+        setSelectedNoteId(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete note:', error);
+      setError(error.message);
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -108,6 +137,7 @@ export default function NotesPage() {
         isLoading={isLoading}
         selectNote={setSelectedNoteId}
         addNewNote={addNewNote} // `addNewNote`를 Sidebar로 전달
+        deleteNote={deleteNote}
       />
       {error && <div className="error-message text-red-600">{error}</div>}
       {selectedNote && (

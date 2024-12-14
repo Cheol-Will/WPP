@@ -24,7 +24,7 @@ model Note {
   id        Int       @id @default(autoincrement())
   title     String
   createdAt DateTime  @default(now())
-  content   Content?  @relation       // Note에서 Content로 연결
+  content   Content?        // Note에서 Content로 연결
   userId    Int                         // 사용자 ID
   user      User      @relation(fields: [userId], references: [id]) // 사용자와 연결
 }

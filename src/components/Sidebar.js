@@ -1,9 +1,9 @@
+// src/components/Sidebar.js
+
 'use client';
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-
 
 function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId }) {
   const router = useRouter();
@@ -13,7 +13,6 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId 
   const [isSearching, setIsSearching] = useState(false);
   const [searchError, setSearchError] = useState(null);
 
-
   const handleLogout = () => {
     // 세션 정보 제거 
     localStorage.removeItem('userId');
@@ -21,7 +20,6 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId 
     // 로그인 페이지로 리디렉션
     router.push('/auth');
   };
-
 
   const handleSearchClick = () => {
     setIsSearchOpen(!isSearchOpen);
@@ -39,8 +37,6 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId 
     setSearchResults([]);
 
     try {
-      
-
       if (!userId) {
         throw new Error('User ID is missing');
       }
@@ -92,8 +88,10 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId 
         </div>
 
         {/* 검색 아이콘 */}
-        <div className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer"
-            onClick={handleSearchClick}>
+        <div
+          className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer"
+          onClick={handleSearchClick}
+        >
           <div className="icon-container flex items-center">
             <svg
               role="graphics-symbol"
@@ -183,26 +181,26 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, userId 
                 </svg>
                 {note.title}
                 <button
-                    onClick={(e) => {
-                      e.stopPropagation(); // 클릭 이벤트가 note 선택에 전달되지 않도록 방지
-                      deleteNote(note.id);
-                    }}
-                    className="text-red-500 hover:text-red-700"
+                  onClick={(e) => {
+                    e.stopPropagation(); // 클릭 이벤트가 note 선택에 전달되지 않도록 방지
+                    deleteNote(note.id);
+                  }}
+                  className="text-red-500 hover:text-red-700 ml-auto"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="w-5 h-5"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M9 3a1 1 0 011-1h4a1 1 0 011 1v1h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6H5a1 1 0 110-2h4V3zm2 1v1h2V4h-2zM8 7h8v11H8V7z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </button>
-              </div>              
+                    <path
+                      fillRule="evenodd"
+                      d="M9 3a1 1 0 011-1h4a1 1 0 011 1v1h4a1 1 0 110 2h-1v12a2 2 0 01-2 2H8a2 2 0 01-2-2V6H5a1 1 0 110-2h4V3zm2 1v1h2V4h-2zM8 7h8v11H8V7z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
             ))
           )}
         </>

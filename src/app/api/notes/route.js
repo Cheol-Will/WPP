@@ -1,6 +1,44 @@
 import prisma from '../../../lib/prisma';
 import { NextResponse } from 'next/server';
+export async function PUT(req, context) {
+  const { params } = context;
+  const noteId = parseInt(params.id, 10);
 
+  if (isNaN(noteId)) {
+    return NextResponse.json({ error: 'Invalid note ID' }, { status: 400 });
+  }
+
+  try {
+    const data = await req.json();
+    const { title, content } = data;
+
+    if (!content || !content.value) {
+      return NextResponse.json({ error: 'Content is missing or invalid' }, { status: 400 });
+    }
+
+    const updatedNote = await prisma.note.update({
+      where: {
+        id: noteId,
+      },
+      data: {
+        title: title,
+        content: {
+          update: {
+            value: content.value,
+          },
+        },
+      },
+      include: {
+        content: true,
+      },
+    });
+
+    return NextResponse.json(updatedNote);
+  } catch (error) {
+    console.error('Failed to update note:', error.message, error.stack);
+    return NextResponse.json({ error: 'Failed to update note' }, { status: 500 });
+  }
+}
 export async function POST(req) {
   try {
     const data = await req.json();

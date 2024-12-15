@@ -12,26 +12,33 @@ export async function PUT(req, context) {
     const data = await req.json();
     const { title, content } = data;
 
-    if (!content || !content.value) {
-      return NextResponse.json({ error: 'Content is missing or invalid' }, { status: 400 });
-    }
+    // if (!content || !content.value) {
+    //   return NextResponse.json({ error: 'Content is missing or invalid' }, { status: 400 });
+    // }
 
-    const updatedNote = await prisma.note.update({
-      where: {
-        id: noteId,
-      },
-      data: {
-        title: title,
-        content: {
-          update: {
-            value: content.value,
-          },
+    const updateData = {};
+    if (title) updateData.title = title;
+    if (content && content.value) {
+      updateData.content = {
+        update: {
+          value: content.value,
         },
-      },
-      include: {
-        content: true,
-      },
+      };
+    }
+    if (typeof isFavorite !== 'undefined') {
+      if (typeof isFavorite !== 'boolean') {
+        return NextResponse.json({ error: '`isFavorite` must be a boolean' }, { status: 400 });
+      }
+      updateData.isFavorite = isFavorite;
+    }
+    console.log('Updating note:', noteId, 'with data:', updateData);
+    // Prisma를 통한 업데이트
+    const updatedNote = await prisma.note.update({
+      where: { id: noteId },
+      data: updateData,
+      include: { content: true },
     });
+
 
     return NextResponse.json(updatedNote);
   } catch (error) {

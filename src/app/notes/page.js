@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import Content from '../../components/Content';
 import CommentsSidebar from '../../components/CommentsSidebar';
+import DarkModeToggle from '../..//components/DarkModeToggle';
 import { useSearchParams } from 'next/navigation';
 
 export default function NotesPage() {
@@ -17,7 +18,6 @@ export default function NotesPage() {
   const userId = searchParams.get('userId'); // URL에서 userId 추출
 
   // get user name by userId from database
-
   useEffect(() => {
     async function fetchNotes() {
       if (!userId) {
@@ -27,12 +27,16 @@ export default function NotesPage() {
 
       setIsLoading(true);
       try {
-        const response = await fetch(`/api/notes?userId=${userId}`); // userId 포함
+        const response = await fetch(`/api/notes?userId=${userId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch notes');
         }
         const data = await response.json();
-        setNotes(data);
+        const sortedNotes = data.sort((a, b) => b.isFavorite - a.isFavorite);
+        setNotes(sortedNotes);
+        if (!selectedNoteId && sortedNotes.length > 0) {
+          setSelectedNoteId(sortedNotes[0].id);
+        }
       } catch (error) {
         console.error('Failed to fetch notes:', error);
         setError('Could not load notes. Please try again later.');
@@ -149,6 +153,28 @@ export default function NotesPage() {
       setError(error.message);
     }
   };
+  const toggleFavorite = async (noteId, isFavorite) => {
+    try {
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite }),
+      });
+      // debugging 
+      console.log("noteId: ", noteId);
+      console.log("isFavorite: ", isFavorite);
+      console.log(JSON.stringify({ isFavorite }));
+      if (!response.ok) throw new Error('Failed to update favorite status');
+  
+      setNotes((prevNotes) =>
+        prevNotes
+          .map((note) => (note.id === noteId ? { ...note, isFavorite } : note))
+          .sort((a, b) => b.isFavorite - a.isFavorite)
+      );
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -158,19 +184,22 @@ export default function NotesPage() {
         selectNote={setSelectedNoteId}
         addNewNote={addNewNote} // `addNewNote`를 Sidebar로 전달
         deleteNote={deleteNote}
+        toggleFavorite={toggleFavorite}
         userId = {userId}
         userName={userName}
         userImage={userImage}
       />
       {error && <div className="error-message text-red-600">{error}</div>}
+
       {selectedNote && (
         <Content
           note={selectedNote}
           updateNote={updateNote} // `updateNote`를 전달
         />
       )}
-       {selectedNote && <CommentsSidebar noteId={selectedNote.id} />}
+      <DarkModeToggle />
 
+      {selectedNote && <CommentsSidebar noteId={selectedNote.id} />}
     </div>
   );
 }

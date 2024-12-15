@@ -29,6 +29,7 @@ model Note {
   userId    Int
   user      User      @relation(fields: [userId], references: [id])
   comments  Comment[]
+  isFavorite Boolean  @default(false)
 }
 
 model Content {

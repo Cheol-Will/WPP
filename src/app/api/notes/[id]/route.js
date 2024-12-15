@@ -1,38 +1,69 @@
 //src/app/api/notes/[id]/route.js
 import prisma from '../../../../lib/prisma';
 import { NextResponse } from 'next/server';
-export async function PUT(req, context) {
-  const { params } = context;
-  const noteId = parseInt(params.id, 10);
 
+export async function PUT(req, context) {
+  const params = await context.params; // `params`를 동기적으로 처리
+  const noteId = parseInt(params.id, 10);
+  console.log("PUT");
   if (isNaN(noteId)) {
     return NextResponse.json({ error: 'Invalid note ID' }, { status: 400 });
   }
 
   try {
     const data = await req.json();
-    const { title, content } = data;
+    const { title, content, isFavorite } = data;
+    console.log(data);
 
-    if (!content || !content.value) {
-      return NextResponse.json({ error: 'Content is missing or invalid' }, { status: 400 });
-    }
+    // if (!content || !content.value) {
+    //   return NextResponse.json({ error: 'Content is missing or invalid' }, { status: 400 });
+    // }
+    console.log("here");
 
-    const updatedNote = await prisma.note.update({
-      where: {
-        id: noteId,
-      },
-      data: {
-        title: title,
-        content: {
-          update: {
-            value: content.value,
-          },
+    
+    const updateData = {};
+    if (title) updateData.title = title;
+    if (content && content.value) {
+      updateData.content = {
+        update: {
+          value: content.value,
         },
-      },
-      include: {
-        content: true,
-      },
+      };
+    }
+    if (typeof isFavorite !== 'undefined') {
+      if (typeof isFavorite !== 'boolean') {
+        return NextResponse.json({ error: '`isFavorite` must be a boolean' }, { status: 400 });
+      }
+      updateData.isFavorite = isFavorite;
+    }
+    console.log('Updating note:', noteId, 'with data:', updateData);
+
+    // Prisma를 통한 업데이트
+    const updatedNote = await prisma.note.update({
+      where: { id: noteId },
+      data: updateData,
+      include: { content: true },
     });
+
+
+
+    // const updatedNote = await prisma.note.update({
+    //   where: {
+    //     id: noteId,
+    //   },
+    //   data: {
+    //     title: title,
+    //     content: {
+    //       update: {
+    //         value: content.value,
+    //       },
+    //     },
+    //     isFavorite: isFavorite,
+    //   },
+    //   include: {
+    //     content: true,
+    //   },
+    // });
 
     return NextResponse.json(updatedNote);
   } catch (error) {

@@ -67,7 +67,7 @@ export default function CommentsSidebar({ noteId }) {
   };
 
   return (
-    <div className="w-128 bg-gray-100 p-4 text-gray-700 font-bold border-r border-gray-300">
+    <div className="component w-128 bg-gray-100 p-4 text-gray-700 font-bold border-l border-gray-300 dark:bg-gray-800 dark:text-gray-100">
         <h3 className="font-bold mb-4">Comments</h3>
         {error && <div className="text-red-500">{error}</div>}
         <div className="flex mb-4">
@@ -86,19 +86,32 @@ export default function CommentsSidebar({ noteId }) {
         </button>
       </div>
       <ul>
-        {comments.map((comment) => (
-          <li key={comment.id} className="mb-2">
-            <div className="flex justify-between">
-              <span>{comment.content}</span>
-              <button
-                onClick={() => deleteComment(comment.id)}
-                className="text-red-500 hover:text-red-700"
-              >
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
+        {comments.map((comment) => {
+          // Format the createdAt to show only date and time up to minutes
+          const formattedDate = new Intl.DateTimeFormat('en-CA', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false, // 24-hour format
+          }).format(new Date(comment.createdAt));
+
+          return (
+            <li key={comment.id} className="mb-2">
+              <div className="flex justify-between">
+                <span>{comment.content}</span>
+                <span>{formattedDate}</span>
+                <button
+                  onClick={() => deleteComment(comment.id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

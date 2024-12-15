@@ -32,17 +32,17 @@ function Content({ note, updateNote }) {
   };
 
   return (
-    <div className="flex-1 p-16 flex flex-col items-center bg-white">
+    <div className=" flex-1 p-16 flex flex-col items-center bg-white dark:bg-gray-800 dark:text-gray-100">
       <input
         type="text"
-        className="text-4xl font-bold w-3/4 my-6 p-2 border-b-2 border-gray-400 focus:outline-none"
+        className="text-4xl font-bold w-3/4 my-6 p-2 border-b-2 border-gray-400 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
         value={title}
         onChange={handleTitleChange}
         onBlur={handleUpdate}
         placeholder="Enter title..."
       />
       <textarea
-        className="w-3/4 h-64 p-4 border border-gray-300 rounded mb-6 focus:outline-none"
+        className="w-3/4 h-64 p-4 border border-gray-300 rounded mb-6 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
         value={contentValue}
         onChange={handleContentChange}
         onBlur={handleUpdate}

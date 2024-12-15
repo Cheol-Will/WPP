@@ -6,8 +6,6 @@ import Sidebar from '../../components/Sidebar';
 import Content from '../../components/Content';
 import CommentsSidebar from '../../components/CommentsSidebar';
 import { useSearchParams } from 'next/navigation';
-import Highlight from 'react-highlight-words';
-import Link from 'next/link';
 
 export default function NotePage({ params }) {
   const [notes, setNotes] = useState([]);
@@ -16,8 +14,7 @@ export default function NotePage({ params }) {
   const [isLoading, setIsLoading] = useState(true);
 
   const searchParams = useSearchParams();
-  const userId = searchParams.get('userId'); // URLì—ì„œ userId ì¶”ì¶œ
-  const highlight = searchParams.get('highlight') || ''; // URLì—ì„œ highlight ì¶”ì¶œ
+  const userId = searchParams.get('userId'); // URL?? userId ??
 
   useEffect(() => {
     async function fetchNotes() {
@@ -33,10 +30,10 @@ export default function NotePage({ params }) {
           throw new Error('Failed to fetch notes');
         }
         const data = await response.json();
-        setNotes(data);
-        // selectedNoteIdê°€ ì—†ë‹¤ë©´ ì²« ë²ˆì§¸ ë…¸íŠ¸ ì„ íƒ
-        if (!selectedNoteId && data.length > 0) {
-          setSelectedNoteId(data[0].id);
+        const sortedNotes = data.sort((a, b) => b.isFavorite - a.isFavorite);
+        setNotes(sortedNotes);
+        if (!selectedNoteId && sortedNotes.length > 0) {
+          setSelectedNoteId(sortedNotes[0].id);
         }
       } catch (error) {
         console.error('Failed to fetch notes:', error);
@@ -59,7 +56,7 @@ export default function NotePage({ params }) {
         body: JSON.stringify({
           title: 'New Note',
           content: { type: 'text', value: '' },
-          userId, // í˜„ìž¬ ì‚¬ìš©ìž ID ì „ë‹¬
+          userId, // íÿ„ìÿ¬ ì‚¬ìÿ©ìÿÿ ID ì „ë‹¬
         }),
       });
 
@@ -107,7 +104,25 @@ export default function NotePage({ params }) {
       setError('Could not update the note. Please try again.');
     }
   };
-
+  const toggleFavorite = async (noteId, isFavorite) => {
+    try {
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ isFavorite }),
+      });
+  
+      if (!response.ok) throw new Error('Failed to update favorite status');
+  
+      setNotes((prevNotes) =>
+        prevNotes
+          .map((note) => (note.id === noteId ? { ...note, isFavorite } : note))
+          .sort((a, b) => b.isFavorite - a.isFavorite)
+      );
+    } catch (error) {
+      console.error('Error updating favorite status:', error);
+    }
+  };
   const deleteNote = async (noteId) => {
     try {
       console.log(`Attempting to delete note with ID: ${noteId}`);
@@ -117,7 +132,7 @@ export default function NotePage({ params }) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId, // í˜„ìž¬ ì‚¬ìš©ìž ID ì „ë‹¬
+          userId, // íÿ„ìÿ¬ ì‚¬ìÿ©ìÿÿ ID ì „ë‹¬
         }),
       });
   
@@ -138,6 +153,9 @@ export default function NotePage({ params }) {
     }
   };
 
+ 
+
+
   const selectedNote = notes.find((note) => note.id === selectedNoteId);
 
   return (
@@ -148,12 +166,14 @@ export default function NotePage({ params }) {
         selectNote={setSelectedNoteId}
         addNewNote={addNewNote}
         deleteNote={deleteNote}
+        toggleFavorite={toggleFavorite}
       />
       {error && <div className="error-message text-red-600 p-4">{error}</div>}
+      <ThemeFontSelector />
       {selectedNote && (
         <Content
           note={selectedNote}
-          updateNote={updateNote} // `updateNote`ë¥¼ ì „ë‹¬
+          updateNote={updateNote} // 
         />
       )}
        {selectedNote && <CommentsSidebar noteId={selectedNote.id} />}

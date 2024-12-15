@@ -1,53 +1,60 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 import HighlightTextarea from './HighlightTextarea';
 
 function Content({ note, updateNote }) {
   const [title, setTitle] = useState(note.title);
   const [contentValue, setContentValue] = useState(note.content?.value || '');
-  const searchParams = useSearchParams();
-  const keyword = searchParams.get('search') || '';
 
+  // note 변경 시 상태 초기화
+  useEffect(() => {
+    setTitle(note.title);
+    setContentValue(note.content?.value || '');
+  }, [note]);
+
+  // 제목 변경 시 바로 업데이트
   const handleTitleChange = (e) => {
-    setTitle(e.target.value);
-  };
-
-  const handleContentChange = (newContent) => {
-    setContentValue(newContent);
-  };
-
-  const handleUpdate = () => {
-    const updatedNote = {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    updateNote({
       ...note,
-      title,
+      title: newTitle,
       content: {
         ...note.content,
         value: contentValue,
       },
-    };
-    updateNote(updatedNote); // 서버에 업데이트 요청
+    });
+  };
+
+  // 내용 변경 시 바로 업데이트
+  const handleContentChange = (newValue) => {
+    setContentValue(newValue);
+    updateNote({
+      ...note,
+      title,
+      content: {
+        ...note.content,
+        value: newValue,
+      },
+    });
   };
 
   return (
-    <div className="flex-1 p-1 mr-24 flex flex-col items-center bg-white dark:bg-gray-800 dark:text-gray-100">
-      {/* 제목 입력 필드 */}
+    <div className="flex-1 p-4 bg-white dark:bg-gray-800 dark:text-gray-100">
+      {/* 제목 입력 */}
       <input
         type="text"
-        className="text-4xl font-bold w-full max-w-4xl my-6 p-4 border-b-2 border-gray-400  focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+        className="w-full text-2xl font-bold border-b border-gray-300 p-2 mb-4 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
         value={title}
-        onChange={handleTitleChange}
-        onBlur={handleUpdate} // 제목 업데이트
+        onChange={handleTitleChange} // 변경 즉시 업데이트
         placeholder="Enter title..."
       />
-      {/* 하이라이트 텍스트 영역 */}
+      {/* 내용 입력 */}
       <HighlightTextarea
         value={contentValue}
-        onChange={handleContentChange}
-        onBlur={handleUpdate} // 내용 업데이트
-        keyword={keyword}
-        className="w-full max-w-4xl h-64 p-4 border border-gray-400 rounded-md focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+        onChange={handleContentChange} // 변경 즉시 업데이트
+        keyword="highlight" // 키워드 하이라이트 예제
       />
     </div>
   );

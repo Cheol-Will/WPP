@@ -109,16 +109,22 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
                 >
                   <path d="M4.35645 15.4678H11.6367C13.0996 15.4678 13.8584 14.6953 13.8584 13.2256V7.02539C13.8584 6.0752 13.7354 5.6377 13.1406 5.03613L9.55176 1.38574C8.97754 0.804688 8.50586 0.667969 7.65137 0.667969H4.35645C2.89355 0.667969 2.13477 1.44043 2.13477 2.91016V13.2256C2.13477 14.7021 2.89355 15.4678 4.35645 15.4678ZM4.46582 14.1279C3.80273 14.1279 3.47461 13.7793 3.47461 13.1436V2.99219C3.47461 2.36328 3.80273 2.00781 4.46582 2.00781H7.37793V5.75391C7.37793 6.73145 7.86328 7.20312 8.83398 7.20312H12.5186V13.1436C12.5186 13.7793 12.1836 14.1279 11.5205 14.1279H4.46582ZM8.95703 6.02734C8.67676 6.02734 8.56055 5.9043 8.56055 5.62402V2.19238L12.334 6.02734H8.95703Z"></path>
                 </svg>
-                <svg 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(note.id, !note.isFavorite);
-                  }}
-                  className={`w-5 h-5 mr-2 ${note.isFavorite ? 'fill-yellow-500' : 'fill-gray-400'} cursor-pointer`}
-                  viewBox="0 0 24 24"
+                <div 
+                  className="relative group" // group 클래스를 사용하여 하위 요소에 호버 상태를 전달
                 >
-                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
+                  <svg 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(note.id, !note.isFavorite);
+                    }}
+                    className={`w-5 h-5 mr-2 cursor-pointer 
+                      ${note.isFavorite ? 'fill-yellow-500' : 'fill-gray-400 group-hover:opacity-100'} 
+                      ${note.isFavorite ? '' : 'opacity-0'}`} // 기본 상태에서 숨기기
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+                  </svg>
+                </div>
                 {note.title}
                 <button
                   onClick={(e) => {

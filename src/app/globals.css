@@ -7,14 +7,30 @@
   --text-color: #000000;
   --component-bg-color: #ffffff;
   --component-text-color: #333333;
+  --font-family: 'sans'; /* 기본 폰트 설정 */
+
 }
+
+html.font-sans {
+  --font-family: Arial, sans-serif;
+}
+
+html.font-serif {
+  --font-family: Georgia, serif;
+}
+
+html.font-mono {
+  --font-family: 'Courier New', monospace;
+}
+
 .dark {
   --background-color: #1F2937; /* Dark 모드 배경 */
   --text-color: #ffffff; /* Dark 모드 텍스트 */
+  
 }
 body {
   background-color: var(--background-color);
   color: var(--text-color);
-  font-family: Arial, sans-serif;
-  transition: background-color 0.3s, color 0.3s;
+  font-family: var(--font-family);
+  transition: font-family 0.3s ease-in-out;
 }

@@ -121,7 +121,7 @@ export async function DELETE(req, context) {
   
     const data = await req.json();
     const { userId } = data;
-    console.log('Deleting note:', id, 'for user:', userId);
+    // console.log('Deleting note:', id, 'for user:', userId);
 
     try {
       // ID 검증

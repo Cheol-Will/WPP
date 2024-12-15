@@ -162,11 +162,11 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
             </div>
           )}
           {searchResults.length === 0 && !isSearching && searchQuery.trim() !== '' && (
-            <div className="text-gray-600 text-sm">No notes found.</div>
+            <div className="text-sm">No notes found.</div>
           )}
         </div>
       )}
-      <h2 className="font-semibold text-gray-800 mb-4">Private</h2>
+      <h2 className="font-semibold mb-4">Private</h2>
       {isLoading ? (
         <div>Loading notes...</div>
       ) : (

@@ -5,6 +5,7 @@ import Sidebar from '../../components/Sidebar';
 import Content from '../../components/Content';
 import CommentsSidebar from '../../components/CommentsSidebar';
 import DarkModeToggle from '../..//components/DarkModeToggle';
+import FontSelector from '../../components/FontSelector'; 
 import { useSearchParams } from 'next/navigation';
 
 export default function NotesPage() {
@@ -190,6 +191,10 @@ export default function NotesPage() {
         userImage={userImage}
       />
       {error && <div className="error-message text-red-600">{error}</div>}
+      <div className="p-4">
+        <DarkModeToggle />
+        <FontSelector /> {/* 폰트 선택 기능 추가 */}
+      </div>
 
       {selectedNote && (
         <Content
@@ -197,7 +202,6 @@ export default function NotesPage() {
           updateNote={updateNote} // `updateNote`를 전달
         />
       )}
-      <DarkModeToggle />
 
       {selectedNote && <CommentsSidebar noteId={selectedNote.id} />}
     </div>

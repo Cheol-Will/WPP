@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 export async function PUT(req, context) {
   const params = await context.params; // `params`를 동기적으로 처리
   const noteId = parseInt(params.id, 10);
-  console.log("PUT");
+  // console.log("PUT");
   if (isNaN(noteId)) {
     return NextResponse.json({ error: 'Invalid note ID' }, { status: 400 });
   }
@@ -13,12 +13,12 @@ export async function PUT(req, context) {
   try {
     const data = await req.json();
     const { title, content, isFavorite } = data;
-    console.log(data);
+    // console.log(data);
 
     // if (!content || !content.value) {
     //   return NextResponse.json({ error: 'Content is missing or invalid' }, { status: 400 });
     // }
-    console.log("here");
+    // console.log("here");
 
     
     const updateData = {};
@@ -135,7 +135,7 @@ export async function DELETE(req, context) {
   const data = await req.json();
   const { userId } = data;
 
-  console.log('Deleting note:', id, 'for user:', userId);
+  // console.log('Deleting note:', id, 'for user:', userId);
   try {
     // ID 검증
     const noteId = parseInt(id, 10);

@@ -4,8 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/Sidebar';
 import Content from '../../components/Content';
 import CommentsSidebar from '../../components/CommentsSidebar';
-import DarkModeToggle from '../..//components/DarkModeToggle';
-import FontSelector from '../../components/FontSelector'; 
+import DarkModeToggle from '../../components/DarkModeToggle';
+import FontSelector from '../../components/FontSelector';
 import { useSearchParams } from 'next/navigation';
 
 export default function NotesPage() {
@@ -16,10 +16,11 @@ export default function NotesPage() {
   const [userImage, setUserImage] = useState('/profile.jpg');
   const [userName, setUserName] = useState('');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId'); // URL에서 userId 추출
+  const noteId = searchParams.get('noteId'); // URL에서 noteId 추출
 
-  // get user name by userId from database
   useEffect(() => {
     async function fetchNotes() {
       if (!userId) {
@@ -36,7 +37,12 @@ export default function NotesPage() {
         const data = await response.json();
         const sortedNotes = data.sort((a, b) => b.isFavorite - a.isFavorite);
         setNotes(sortedNotes);
-        if (!selectedNoteId && sortedNotes.length > 0) {
+
+        if (noteId) {
+          // noteId가 있으면 해당 노트 선택
+          setSelectedNoteId(parseInt(noteId, 10));
+        } else if (sortedNotes.length > 0) {
+          // noteId가 없으면 첫 번째 노트 선택
           setSelectedNoteId(sortedNotes[0].id);
         }
       } catch (error) {
@@ -48,10 +54,12 @@ export default function NotesPage() {
     }
 
     fetchNotes();
-  }, [userId]);
+  }, [userId, noteId]);
 
   useEffect(() => {
     async function fetchUserData() {
+      if (!userId) return;
+
       try {
         const response = await fetch(`/api/user/${userId}`);
         if (!response.ok) throw new Error('Failed to fetch user data');
@@ -64,7 +72,7 @@ export default function NotesPage() {
     }
 
     fetchUserData();
-  }, []);
+  }, [userId]);
 
   const addNewNote = async () => {
     try {
@@ -125,10 +133,8 @@ export default function NotesPage() {
     }
   };
 
-  const selectedNote = notes.find((note) => note.id === selectedNoteId);
   const deleteNote = async (noteId) => {
     try {
-      console.log(`Attempting to delete note with ID: ${noteId}`);
       const response = await fetch(`/api/notes/${noteId}`, {
         method: 'DELETE',
         headers: {
@@ -138,14 +144,13 @@ export default function NotesPage() {
           userId, // 현재 사용자 ID 전달
         }),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json();
         console.error('Delete note failed:', errorData);
         throw new Error(errorData.error || 'Failed to delete note');
       }
-  
-      console.log(`Note with ID: ${noteId} deleted successfully`);
+
       setNotes((prevNotes) => prevNotes.filter((note) => note.id !== noteId));
       if (selectedNoteId === noteId) {
         setSelectedNoteId(null);
@@ -155,6 +160,7 @@ export default function NotesPage() {
       setError(error.message);
     }
   };
+
   const toggleFavorite = async (noteId, isFavorite) => {
     try {
       const response = await fetch(`/api/notes/${noteId}`, {
@@ -162,12 +168,9 @@ export default function NotesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isFavorite }),
       });
-      // debugging 
-      console.log("noteId: ", noteId);
-      console.log("isFavorite: ", isFavorite);
-      console.log(JSON.stringify({ isFavorite }));
+
       if (!response.ok) throw new Error('Failed to update favorite status');
-  
+
       setNotes((prevNotes) =>
         prevNotes
           .map((note) => (note.id === noteId ? { ...note, isFavorite } : note))
@@ -177,30 +180,33 @@ export default function NotesPage() {
       console.error('Error updating favorite status:', error);
     }
   };
+
   const toggleSettings = () => {
-    setIsSettingsOpen(!isSettingsOpen); // 설정 패널 열기/닫기 토글
+    setIsSettingsOpen(!isSettingsOpen);
   };
+
+  const selectedNote = notes.find((note) => note.id === selectedNoteId);
+
   return (
     <div className="flex min-h-screen">
       <Sidebar
         notes={notes}
         isLoading={isLoading}
         selectNote={setSelectedNoteId}
-        addNewNote={addNewNote} // `addNewNote`를 Sidebar로 전달
+        addNewNote={addNewNote}
         deleteNote={deleteNote}
         toggleFavorite={toggleFavorite}
-        userId = {userId}
+        userId={userId}
         userName={userName}
         userImage={userImage}
       />
       {error && <div className="error-message text-red-600">{error}</div>}
-      <div className='p-1 w-[260px]'>
+      <div className="p-1 w-[260px]">
         <button
           onClick={toggleSettings}
           className="bg-gray-200 hover:bg-gray-300 text-gray-700 ml-2 rounded-full"
           aria-label="Settings"
         >
-          {/* Settings SVG Icon */}
           <img
             src="/files/settings-svgrepo-com.svg"
             alt="Settings"
@@ -209,19 +215,17 @@ export default function NotesPage() {
         </button>
 
         {isSettingsOpen && (
-          <div className='p-1'>
+          <div className="p-1">
             <DarkModeToggle />
             <FontSelector />
           </div>
         )}
       </div>
 
-   
-
       {selectedNote && (
         <Content
           note={selectedNote}
-          updateNote={updateNote} // `updateNote`를 전달
+          updateNote={updateNote}
         />
       )}
 

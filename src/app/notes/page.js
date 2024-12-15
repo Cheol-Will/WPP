@@ -15,6 +15,7 @@ export default function NotesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [userImage, setUserImage] = useState('/profile.jpg');
   const [userName, setUserName] = useState('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId'); // URL에서 userId 추출
 
@@ -176,7 +177,9 @@ export default function NotesPage() {
       console.error('Error updating favorite status:', error);
     }
   };
-
+  const toggleSettings = () => {
+    setIsSettingsOpen(!isSettingsOpen); // 설정 패널 열기/닫기 토글
+  };
   return (
     <div className="flex min-h-screen">
       <Sidebar
@@ -191,10 +194,29 @@ export default function NotesPage() {
         userImage={userImage}
       />
       {error && <div className="error-message text-red-600">{error}</div>}
-      <div className="p-4">
-        <DarkModeToggle />
-        <FontSelector /> {/* 폰트 선택 기능 추가 */}
+      <div className='p-1 w-[260px]'>
+        <button
+          onClick={toggleSettings}
+          className="bg-gray-200 hover:bg-gray-300 text-gray-700 ml-2 rounded-full"
+          aria-label="Settings"
+        >
+          {/* Settings SVG Icon */}
+          <img
+            src="/files/settings-svgrepo-com.svg"
+            alt="Settings"
+            className="w-6 h-6"
+          />
+        </button>
+
+        {isSettingsOpen && (
+          <div className='p-1'>
+            <DarkModeToggle />
+            <FontSelector />
+          </div>
+        )}
       </div>
+
+   
 
       {selectedNote && (
         <Content

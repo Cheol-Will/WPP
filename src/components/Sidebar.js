@@ -7,11 +7,7 @@ import Link from 'next/link';
 
 function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleFavorite, userId, userImage, userName }) {
   const router = useRouter();
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchError, setSearchError] = useState(null);
+
 
   const profileImage = userImage
   ? `/files/${userImage}` // DB에 저장된 이미지 이름으로 경로 생성
@@ -29,50 +25,6 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
     router.push(`/profile/${userId}`);
   };
 
-
-  const handleSearchClick = () => {
-    setIsSearchOpen(!isSearchOpen);
-    setSearchResults([]);
-    setSearchQuery('');
-    setSearchError(null);
-  };
-
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (searchQuery.trim() === '') return;
-
-    setIsSearching(true);
-    setSearchError(null);
-    setSearchResults([]);
-
-    try {
-      if (!userId) {
-        throw new Error('User ID is missing');
-      }
-
-      const res = await fetch(`/api/notes?userId=${userId}&query=${encodeURIComponent(searchQuery)}`);
-      const data = await res.json();
-
-      if (res.ok) {
-        setSearchResults(data);
-      } else {
-        throw new Error(data.error || 'Failed to search notes');
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      setSearchError(error.message);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  const handleResultClick = (noteId) => {
-    router.push(`/notes/${noteId}?highlight=${encodeURIComponent(searchQuery)}`);
-    setIsSearchOpen(false);
-    setSearchQuery('');
-    setSearchResults([]);
-    setSearchError(null);
-  };
 
   return (
     <div className="component flex flex-col w-64 bg-neutral-100 text-gray-700 p-4 min-h-screen font-bold border-r border-gray-300 dark:bg-gray-800 dark:text-gray-100">
@@ -98,7 +50,7 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
         {/* 검색 아이콘 */}
         <div
           className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer"
-          onClick={handleSearchClick}
+
         >
           <div className="icon-container flex items-center">
             <svg
@@ -126,46 +78,7 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
           <span className="ml-2">Home</span>
         </div>
       </div>
-      {isSearchOpen && (
-        <div className="mb-8">
-          <form onSubmit={handleSearch} className="flex mb-2">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Enter keyword..."
-              className="border rounded-l px-2 py-1 w-full"
-            />
-            <button
-              type="submit"
-              className="bg-blue-500 text-white px-4 py-1 rounded-r"
-              disabled={isSearching}
-            >
-              {isSearching ? 'Searching...' : 'Search'}
-            </button>
-          </form>
-          {searchError && <div className="text-red-600 text-sm mb-2">{searchError}</div>}
-          {searchResults.length > 0 && (
-            <div className="overflow-y-auto max-h-60">
-              <ul>
-                {searchResults.map((note) => (
-                  <li key={note.id} className="mb-2">
-                    <button
-                      onClick={() => handleResultClick(note.id)}
-                      className="text-left w-full hover:bg-gray-200 p-2 rounded"
-                    >
-                      {note.title}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {searchResults.length === 0 && !isSearching && searchQuery.trim() !== '' && (
-            <div className="text-sm">No notes found.</div>
-          )}
-        </div>
-      )}
+      
       <h2 className="font-semibold mb-4">Private</h2>
       {isLoading ? (
         <div>Loading notes...</div>

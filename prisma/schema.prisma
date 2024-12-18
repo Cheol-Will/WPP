@@ -19,6 +19,7 @@ model User {
   password String                     // 사용자 비밀번호
   image    String?
   notes    Note[]                     // 사용자와 연결된 노트
+  musics   Music[]                    // 사용자와 연결된 음악
 }
 
 model Note {
@@ -45,4 +46,12 @@ model Comment {
   createdAt DateTime  @default(now())
   noteId    Int       
   note      Note      @relation(fields: [noteId], references: [id], onDelete: Cascade)
+}
+
+model Music {
+  id        Int      @id @default(autoincrement())
+  fileName  String
+  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -1,3 +1,4 @@
+// src/app/notes/page.js
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -6,6 +7,7 @@ import Content from '../../components/Content';
 import CommentsSidebar from '../../components/CommentsSidebar';
 import DarkModeToggle from '../../components/DarkModeToggle';
 import FontSelector from '../../components/FontSelector';
+import MusicSidebar from '@/components/MusicSidebar';
 import { useSearchParams } from 'next/navigation';
 
 export default function NotesPage() {
@@ -13,9 +15,15 @@ export default function NotesPage() {
   const [selectedNoteId, setSelectedNoteId] = useState(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [userImage, setUserImage] = useState('/profile.jpg');
+  
+  // 초기 userImage 상태를 null로 변경
+  const [userImage, setUserImage] = useState(null); // 기존: '/profile.jpg' -> 변경: null
   const [userName, setUserName] = useState('');
+
+  /* Settings, Music, Comments Open buttons */
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isMusicOpen, setIsMusicOpen] = useState(false);
+  const [activeSidebar, setActiveSidebar] = useState(null);
 
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId'); // URL에서 userId 추출
@@ -64,10 +72,13 @@ export default function NotesPage() {
         const response = await fetch(`/api/user/${userId}`);
         if (!response.ok) throw new Error('Failed to fetch user data');
         const data = await response.json();
-        setUserImage(data.image || '/profile.jpg');
+        
+        // userImage을 data.image 또는 null로 설정
+        setUserImage(data.image || null); // 기존: '/profile.jpg' -> 변경: null
         setUserName(data.username);
       } catch (error) {
         console.error('Error fetching user data:', error);
+        setUserImage(null); // 에러 발생 시에도 null로 설정
       }
     }
 
@@ -185,10 +196,20 @@ export default function NotesPage() {
     setIsSettingsOpen(!isSettingsOpen);
   };
 
+  const toggleMusic = () => {
+    setIsMusicOpen(!isMusicOpen);
+  };
+
+
+  const toggleSidebar = (sidebar) => {
+    setActiveSidebar((prevSidebar) => (prevSidebar === sidebar ? null : sidebar));
+  };
+
   const selectedNote = notes.find((note) => note.id === selectedNoteId);
 
   return (
     <div className="flex min-h-screen">
+      {/* Sidebar */}
       <Sidebar
         notes={notes}
         isLoading={isLoading}
@@ -198,24 +219,55 @@ export default function NotesPage() {
         toggleFavorite={toggleFavorite}
         userId={userId}
         userName={userName}
-        userImage={userImage}
+        userImage={userImage} // 수정된 userImage 전달
       />
+      
       {error && <div className="error-message text-red-600">{error}</div>}
+      
       <div className="p-1 w-[260px]">
-        <button
-          onClick={toggleSettings}
-          className="bg-gray-200 hover:bg-gray-300 text-gray-700 ml-2 rounded-full"
-          aria-label="Settings"
-        >
-          <img
-            src="/files/settings-svgrepo-com.svg"
-            alt="Settings"
-            className="w-6 h-6"
-          />
-        </button>
+        <div className="flex justify-center space-x-2">
+          {/* Settings 버튼 */}
+          <button
+            onClick={toggleSettings}
+            className="hover:bg-gray-300 px-2 text-gray-700 ml-2 rounded-full 
+                      dark:bg-[#333333] dark:hover:bg-[#444444] dark:text-[#E0E0E0]"
+            aria-label="Settings"
+          >
+            <img
+              src="/files/settings-svgrepo-com.svg"
+              alt="Settings"
+              className="w-6 h-6"
+            />
+          </button>
+
+          {/* Comments 버튼 */}
+          <button
+            onClick={() => toggleSidebar('comments')}
+            className={`px-4 py-2 rounded ${
+              activeSidebar === 'comments' 
+                ? 'bg-blue-500 text-white dark:bg-[#BB86FC] dark:text-white' 
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-[#333333] dark:text-[#E0E0E0] dark:hover:bg-[#444444]'
+            }`}
+          >
+            Comments
+          </button>
+
+          {/* Music 버튼 */}
+          <button
+            onClick={() => toggleSidebar('music')}
+            className={`px-4 py-2 rounded ${
+              activeSidebar === 'music' 
+                ? 'bg-blue-500 text-white dark:bg-[#BB86FC] dark:text-white' 
+                : 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-[#333333] dark:text-[#E0E0E0] dark:hover:bg-[#444444]'
+            }`}
+          >
+            Music
+          </button>
+        </div>
+
 
         {isSettingsOpen && (
-          <div className="p-1">
+          <div className="px-1 py-10">
             <DarkModeToggle />
             <FontSelector />
           </div>
@@ -229,7 +281,21 @@ export default function NotesPage() {
         />
       )}
 
-      {selectedNote && <CommentsSidebar noteId={selectedNote.id} />}
+      <div className="right-4 flex space-x-2">
+
+        <div className='w-[350px]'>
+          {activeSidebar === 'comments' && selectedNote && (
+            <CommentsSidebar
+              noteId={selectedNote.id}
+            />
+          )}
+          {activeSidebar === 'music' && (
+            <MusicSidebar
+              userId={userId}
+            />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

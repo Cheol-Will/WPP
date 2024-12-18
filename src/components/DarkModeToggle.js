@@ -24,7 +24,7 @@ export default function DarkModeToggle() {
     <div className="p-1">
       <button
         onClick={toggleTheme}
-        className="p-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
+        className="p-1 rounded bg-gray-200 dark:hover:bg-[#333333] dark:bg-[#333333] dark:text-[#E0E0E0] dark:hover:bg-[#444444]"
       >
         {theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
       </button>

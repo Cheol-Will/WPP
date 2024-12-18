@@ -8,16 +8,41 @@ import Link from 'next/link';
 function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleFavorite, userId, userImage, userName }) {
   const router = useRouter();
 
+  // 상태 변수 설정
+  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [imgSrc, setImgSrc] = useState(userImage ? `/files/${userImage}` : null);
+  const defaultImageUrl = '/files/profile.jpg';
 
-  const profileImage = userImage
-  ? `/files/${userImage}` // DB에 저장된 이미지 이름으로 경로 생성
-  : '/files/default.png'; // 기본 이미지
+  useEffect(() => {
+    if (userImage) {
+      setImgSrc(`/files/${userImage}`);
+      setIsImageLoading(true);
+    } else {
+      setImgSrc(defaultImageUrl);
+      setIsImageLoading(false);
+    }
+  }, [userImage]);
+
+  // 이미지 로딩 성공 시 호출
+  const handleImageLoad = () => {
+    setIsImageLoading(false);
+  };
+
+  // 이미지 로딩 실패 시 호출
+  const handleImageError = () => {
+    if (imgSrc !== defaultImageUrl) {
+      setImgSrc(defaultImageUrl);
+      setIsImageLoading(true); // 기본 이미지 로딩 상태로 설정
+    } else {
+      setIsImageLoading(false); // 기본 이미지도 로딩 실패 시
+    }
+  };
 
   const handleLogout = () => {
-    // remove user ID from local storage
+    // 로컬 스토리지에서 사용자 ID 제거
     localStorage.removeItem('userId');
 
-    // redirect to login page
+    // 로그인 페이지로 리디렉션
     router.push('/auth');
   };
 
@@ -33,16 +58,52 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
     router.push(`/search?userId=${userId}`);
   };
 
-
   return (
-    <div className="component flex flex-col w-64 bg-neutral-100 text-gray-700 p-4 min-h-screen font-bold border-r border-gray-300 dark:bg-gray-800 dark:text-gray-100">
+    <div className="flex flex-col w-64 bg-neutral-100 text-gray-700 p-4 min-h-screen font-bold border-r border-gray-300 dark:bg-[#1F1F1F] dark:text-[#E0E0E0] dark:border-gray-600">
       {/* 기본 정보 섹션 */}
       <div className="mb-8">
         {/* 프로필 아이콘 */}
-        <div className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer mb-4" onClick={handleProfileClick}>
+        <div
+          className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer mb-4 dark:hover:bg-[#333333]"
+          onClick={handleProfileClick}
+        >
           <div className="icon-container flex items-center">
-              <img src={profileImage} alt="profile" className="w-12 h-12 rounded-full" />
-            </div>
+            {/* 로딩 중일 때 스피너 표시 */}
+            {isImageLoading && (
+              <div className="w-12 h-12 flex items-center justify-center">
+                <svg
+                  className="animate-spin h-6 w-6 text-gray-500"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+              </div>
+            )}
+            {/* 이미지 표시 */}
+            {imgSrc && (
+              <img
+                src={imgSrc}
+                alt="profile"
+                className={`w-12 h-12 rounded-full ${isImageLoading ? 'hidden' : 'block'}`}
+                onLoad={handleImageLoad}
+                onError={handleImageError}
+              />
+            )}
+          </div>
           <span className="ml-2">{userName}의 페이지</span>
           <svg
             role="graphics-symbol"
@@ -57,7 +118,7 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
 
         {/* 검색 아이콘 */}
         <div
-          className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer"
+          className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer dark:hover:bg-[#333333]"
           onClick={handleSearchClick}
         >
           <div className="icon-container flex items-center">
@@ -73,8 +134,10 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
         </div>
 
         {/* 홈 아이콘 */}
-        <div className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer"
-          onClick={handleHomeClick}>
+        <div
+          className="menu-item flex items-center p-2 hover:bg-gray-200 rounded cursor-pointer dark:hover:bg-[#333333]"
+          onClick={handleHomeClick}
+        >
           <div className="icon-container flex items-center">
             <svg
               role="graphics-symbol"
@@ -87,7 +150,7 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
           <span className="ml-2">Home</span>
         </div>
       </div>
-      
+
       <h2 className="font-semibold mb-4">Private</h2>
       {isLoading ? (
         <div>Loading notes...</div>
@@ -99,27 +162,25 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
             notes.map((note) => (
               <div
                 key={note.id}
-                className="menu-item flex items-center p-2 mb-2 rounded cursor-pointer hover:bg-gray-200 "
+                className="menu-item flex items-center py-2 px-1 mb-2 rounded cursor-pointer hover:bg-gray-200 dark:hover:bg-[#333333]"
                 onClick={() => selectNote(note.id)}
               >
                 <svg
                   role="graphics-symbol"
                   viewBox="0 0 20 20"
-                  className="w-5 h-5 fill-current mr-2"
+                  className="w-5 h-5 fill-current mr-0"
                 >
                   <path d="M4.35645 15.4678H11.6367C13.0996 15.4678 13.8584 14.6953 13.8584 13.2256V7.02539C13.8584 6.0752 13.7354 5.6377 13.1406 5.03613L9.55176 1.38574C8.97754 0.804688 8.50586 0.667969 7.65137 0.667969H4.35645C2.89355 0.667969 2.13477 1.44043 2.13477 2.91016V13.2256C2.13477 14.7021 2.89355 15.4678 4.35645 15.4678ZM4.46582 14.1279C3.80273 14.1279 3.47461 13.7793 3.47461 13.1436V2.99219C3.47461 2.36328 3.80273 2.00781 4.46582 2.00781H7.37793V5.75391C7.37793 6.73145 7.86328 7.20312 8.83398 7.20312H12.5186V13.1436C12.5186 13.7793 12.1836 14.1279 11.5205 14.1279H4.46582ZM8.95703 6.02734C8.67676 6.02734 8.56055 5.9043 8.56055 5.62402V2.19238L12.334 6.02734H8.95703Z"></path>
                 </svg>
-                <div 
-                  className="relative group" // group 클래스를 사용하여 하위 요소에 호버 상태를 전달
-                >
-                  <svg 
+                <div className="relative group">
+                  <svg
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleFavorite(note.id, !note.isFavorite);
                     }}
                     className={`w-5 h-5 mr-2 cursor-pointer 
                       ${note.isFavorite ? 'fill-yellow-500' : 'fill-gray-400 group-hover:opacity-100'} 
-                      ${note.isFavorite ? '' : 'opacity-0'}`} // 기본 상태에서 숨기기
+                      ${note.isFavorite ? '' : 'opacity-0'}`}
                     viewBox="0 0 24 24"
                   >
                     <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
@@ -128,7 +189,7 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
                 {note.title}
                 <button
                   onClick={(e) => {
-                    e.stopPropagation(); // 클릭 이벤트가 note 선택에 전달되지 않도록 방지
+                    e.stopPropagation();
                     deleteNote(note.id);
                   }}
                   className="text-red-500 hover:text-red-700 ml-auto"
@@ -152,7 +213,7 @@ function Sidebar({ notes, isLoading, selectNote, addNewNote, deleteNote, toggleF
         </>
       )}
       <div
-        className="menu-item flex items-center p-2 bg-gray-300 rounded cursor-pointer mt-4"
+        className="menu-item flex items-center p-2 bg-gray-300 rounded cursor-pointer mt-4 hover:bg-gray-400 dark:bg-[#333333] dark:hover:bg-[#444444]"
         onClick={addNewNote}
       >
         <svg

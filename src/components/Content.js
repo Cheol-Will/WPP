@@ -41,11 +41,11 @@ function Content({ note, updateNote }) {
   };
 
   return (
-    <div className="flex-1 p-4 bg-white dark:bg-gray-800 dark:text-gray-100">
+    <div className="flex-1 p-4 py-16 bg-white dark:bg-[#1F1F1F] dark:text-[#E0E0E0] dark:border-gray-600">
       {/* 제목 입력 */}
       <input
         type="text"
-        className="w-full text-2xl font-bold border-b border-gray-300 p-2 mb-4 focus:outline-none dark:bg-gray-800 dark:text-gray-100"
+        className="w-full text-2xl font-bold border-b border-gray-300 p-2 mb-4 focus:outline-none dark:bg-[#1F1F1F] dark:text-[#E0E0E0] dark:border-gray-600"
         value={title}
         onChange={handleTitleChange} // 변경 즉시 업데이트
         placeholder="Enter title..."
